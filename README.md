@@ -3,6 +3,8 @@ LynxLayoutMaker
 
 FinishLynx Layout Maker
 
+[Demo](http://bsparacino.github.io/LynxLayoutMaker)
+
 Below is an example output from this application, copy this code to your Lynx.cfg file and restart FinishLynx.
 ```
 \Event\Layout\5\:,1=
