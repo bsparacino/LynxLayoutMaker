@@ -1,0 +1,127 @@
+
+<!doctype html>
+<html ng-app="lynx">
+<head>
+	<title>FinishLynx Layout Maker</title>
+	<script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="//code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.10/angular.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.min.css"/>
+
+	<style>
+
+		#container {
+		    border:solid black 1px;
+		    position:absolute;
+		    background:url(data:image/gif;base64,R0lGODlhFAAUAIAAAMDAwP///yH5BAEAAAEALAAAAAAUABQAAAImhI+pwe3vAJxQ0hssnnq/7jVgmJGfGaGiyoyh68GbjNGXTeEcGxQAOw==);
+		}
+
+		.box {
+		    background:red;
+		    width:100px;
+		    height:100px;
+		    border:black 1px solid;
+		    position:absolute;
+		    opacity: 0.7;
+		    font-size: 20px;
+		    text-align: center;
+		    font-weight: bold;
+		    line-height: 50px;
+			vertical-align: bottom;
+		}
+
+	</style>
+
+</head>
+<body ng-controller="LynxCtrl">
+
+	<h2>FinishLynx Layout Maker by Brian Sparacino</h2>
+
+	<div id="container">
+		<div ng-repeat="layout in layouts" class="box">{{layout.name}}</div>
+	</div>
+
+	<div style="position:absolute;margin-top:565px">
+		<div ng-repeat="layout in layouts">
+			<strong>{{layout.name}}</strong>
+			<br />left: {{layout.left}}
+			<br />top: {{layout.top}}
+			<br />right: {{layout.right}}
+			<br />bottom: {{layout.bottom}}
+			<br /><br />
+		</div>
+	</div>
+
+	<div style="position:absolute;margin-top:565px;margin-left:200px">
+		<textarea rows="7" cols="60">{{lynxFile()}}</textarea>
+	</div>
+
+	<script>
+
+		var width = 960;
+		var height = 540;
+
+		$('#container').width(width).height(height);
+
+		angular.module('lynx', [])
+		.directive('box', function()
+		{
+			return {
+				restrict: 'C',
+				scope: '@',
+				link: function(scope, element, attrs)
+				{
+					$(element)
+						.css('left',scope.layout.left*width/100)
+						.css('top',scope.layout.top*height/100)
+						.css('background',scope.layout.color)
+						.width((scope.layout.right-scope.layout.left)*width/100)
+						.height((scope.layout.bottom-scope.layout.top)*height/100)
+						.draggable({
+						    grid: [ 2,2 ],
+						    containment: "#container",
+						    stack: ".box",
+						    snap: true,
+							drag: function(event, ui)
+							{
+								scope.$apply(function()
+								{
+									scope.layout.left = Math.round(ui.position.left/(width/100));
+									scope.layout.top = Math.round(ui.position.top/(height/100));
+									scope.layout.right = Math.round((ui.position.left+$(element).width())/(width/100));
+									scope.layout.bottom = Math.round((ui.position.top+$(element).height())/(height/100));
+								});
+							}
+						}).resizable({
+							grid: 2,
+							containment: "#container",
+							resize: function(event, ui)
+							{
+								scope.$apply(function()
+								{
+									scope.layout.right = Math.round((ui.position.left+ui.size.width)/(width/100));
+									scope.layout.bottom = Math.round((ui.position.top+ui.size.height)/(height/100));
+								});
+							}
+						});
+				}
+			};
+		})
+		.controller('LynxCtrl', function($scope)
+		{			
+			$scope.layouts = [{name:'Summary1',left:0,top:0,right:35,bottom:35,label:'Left',color:'#5e58a2'},{name:'Results1',left:35,top:0,right:100,bottom:35,label:'Right',color:'#ef970d'},{name:'Image1',left:0,top:35,right:50,bottom:75,label:'Left',color:'#3913c8'},{name:'Image2',left:50,top:35,right:100,bottom:75,label:'Right',color:'#df6f8c'},{name:'Image3',left:0,top:75,right:100,bottom:100,label:'Bottom',color:'#7bdc5c'}];
+
+			$scope.lynxFile = function()
+			{
+				var output = "\\Event\\Layout\\5\\:,1="+"\r\n";
+				$.each($scope.layouts, function(i, layout)
+				{
+					output += "\\Event\\Layout\\5\\"+layout.name+":String,1="+layout.left+","+layout.top+","+layout.right+","+layout.bottom+","+layout.label+""+"\r\n";
+				});
+				return output;
+			};
+		});	
+
+	</script>
+
+</body>
